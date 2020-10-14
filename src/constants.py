@@ -1,23 +1,5 @@
-import enum
+PRETIX_ORGANIZER = 'ophase'
+PRETIX_EVENT = 'ws-2020-21'
 
-
-
-class Products(enum.Enum):
-    BACHELOR = 0
-    MASTER = 1
-
-
-
-class Programs(enum.Enum):
-    # Bachelor.
-    BACHELOR_OF_SCIENCE = 0
-    BACHELOR_OF_EDUCATION = 1
-    JOINT_BACHELOR_OF_ARTS = 2
-    TEACHING_AT_SECONDARY_SCHOOLS = 3
-    # Master.
-    AUTONOMOUS_SYSTEMS = 4
-    DISTRIBUTED_SOFTWARE_SYSTEMS = 5
-    UNIVERSAL = 6
-    INTERNET_AND_WEBBASED_SYSTEMS = 7
-    IT_SECURITY = 8
-    VISUAL_COMPUTING = 9
+EMOJI_FLAG_US = '🇺🇸'
+EMOJI_FLAG_DE = '🇩🇪'
