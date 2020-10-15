@@ -2,11 +2,9 @@ import enum
 from typing import List, Optional
 
 
-
 class Products(enum.Enum):
     BACHELOR = 0
     MASTER = 1
-
 
 
 class Programs(enum.Enum):
@@ -24,16 +22,21 @@ class Programs(enum.Enum):
     VISUAL_COMPUTING = 9
 
 
-
 class UserState(enum.Enum):
     NEW = 0
     LANGUAGE_REQUESTED = 1
     LANGUAGE_CONFIGURED = 2
+    ORDER_CONFIRM = 3
+    ORDER_CONFIRMED = 4
+    MANUAL_PRODUCT_ASKED = 5
+    MANUAL_BACHELOR_PROGRAM_ASKED = 6
+    MANUAL_MASTER_PROGRAM_ASKED = 7
+    PROGRAMMING_COURSE_ASKED = 8
 
+    FINISHED = 100
 
-    def next(user_state: 'UserState') -> 'UserState':
-        return UserState(user_state.value + 1)
-
+    def next(self) -> 'UserState':
+        return UserState(self.value + 1)
 
 
 class UserLanguage(enum.Enum):
@@ -41,21 +44,19 @@ class UserLanguage(enum.Enum):
     GERMAN = 1
 
 
-
 class UserInfo:
     state: UserState
     language: UserLanguage
+    last_message_id: int
 
-
-    def __init__(self, state: UserState, language: UserLanguage):
+    def __init__(self, state: UserState, language: UserLanguage, last_message_id: int):
         self.state = state
         self.language = language
-
+        self.last_message_id = last_message_id
 
     def next_state(self):
         self.state = self.state.next()
         return self
-
 
 
 class Order:
@@ -63,7 +64,6 @@ class Order:
     product: Products
     programs: List[Programs]
     programming_course: Optional[bool]
-
 
     def __init__(self, discord_username: str, product: Products, programs: List[Programs], programming_course: Optional[bool]):
         self.discord_username = discord_username

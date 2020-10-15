@@ -1,6 +1,5 @@
 import os
 
-
 PRETIX_AUTH_TOKEN = os.getenv('PRETIX_AUTH_TOKEN')
 if not PRETIX_AUTH_TOKEN:
     raise Exception('Please set the environment variable PRETIX_AUTH_TOKEN to the pretix authentication token.')
