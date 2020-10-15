@@ -46,7 +46,8 @@ class Database:
         self._conn.execute('INSERT INTO orders (discord_username, product_id, programming_course) VALUES (?, ?, ?)',
                            [order.discord_username, order.product.value, order.programming_course])
         for program_id in order.programs:
-            self._conn.execute('INSERT INTO orders_programs (discord_username, program_id) VALUES (?, ?)', [order.discord_username, program_id.value])
+            self._conn.execute('INSERT INTO orders_programs (discord_username, program_id) VALUES (?, ?) ON CONFLICT (discord_username, program_id) DO NOTHING',
+                               [order.discord_username, program_id.value])
         self._conn.commit()
         return True
 

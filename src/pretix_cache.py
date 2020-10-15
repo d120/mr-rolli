@@ -1,3 +1,4 @@
+from time import time
 from typing import Dict, List, Optional, Tuple
 
 from src.database import Database
@@ -41,35 +42,46 @@ class PretixCache:
         for raw_order in raw_orders:
             order_info = self._extract_order_information(raw_order)
             if order_info is not None:
-                discord_id, product, programs, programming_course = order_info
-                self._db.insert_order(Order(discord_id, product, programs, programming_course), overwrite=True)
+                discord_username, product, programs, programming_course = order_info
+                self._db.insert_order(Order(discord_username, product, programs, programming_course), overwrite=True)
 
     def get_order(self, discord_username: str):
         return self._db.get_order(discord_username)
 
     def _extract_order_information(self, raw_order: Dict[str, any]) -> Optional[Tuple[str, Products, List[Programs], Optional[bool]]]:
-        discord_id = None
+        discord_username = None
         product = PRODUCTS_MAP[raw_order['item']]
         programs = []
         programming_course = None
         for answer in raw_order['answers']:
             question_identifier = answer['question_identifier']
             if question_identifier == DISCORD_QUESTION_IDENTIFIER:
-                discord_id = '#'.join([x.strip() for x in answer['answer'].split('#')])
+                discord_username = '#'.join([x.strip() for x in answer['answer'].split('#')])
+                if '#' not in discord_username:
+                    discord_username = None
             elif question_identifier == BACHELOR_QUESTION_IDENTIFIER or question_identifier == MASTER_QUESTION_IDENTIFIER:
                 for opt in answer['option_identifiers']:
                     programs.append(PROGRAMS_MAP[opt])
             elif question_identifier == PROGRAMMING_COURSE_QUESTION_IDENTIFIER:
                 programming_course = answer['answer'] == 'True'
-        if discord_id is None:
+        if discord_username is None:
             return None
-        return discord_id, product, programs, programming_course
+        return discord_username, product, programs, programming_course
 
     def _fetch_raw_orders(self) -> List[Dict[str, any]]:
         result = []
         page = 1
+        total_pages = None
         while page is not None:
-            sublist, page, _ = self._api.get_orders(self._organizer, self._event_name, page=page)
+            if total_pages is None:
+                print('Requesting page %d...' % page)
+            else:
+                # noinspection PyStringFormat
+                print('Requesting page %d/%d...' % (page, total_pages))
+            start = time()
+            sublist, next_page, _, total_pages = self._api.get_orders(self._organizer, self._event_name, page=page)
+            end = time()
             result += sublist
-            break  # TODO: Remove.
+            print('Finished request %d/%d. Took %.1fs.' % (page, total_pages, end - start))
+            page = next_page
         return result
