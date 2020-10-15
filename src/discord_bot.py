@@ -71,11 +71,15 @@ class DiscordBot(discord.Client):
         if message_id != user_info.last_message_id:
             return
         if user_info.state == UserState.LANGUAGE_REQUESTED:
-            language = None
+            language, lang_suffix, welcome_filename = None, None, None
             if emoji == Emojis.FLAG_DE:
                 language = UserLanguage.GERMAN
+                lang_suffix = 'de'
+                welcome_filename = 'Willkommen.pdf'
             elif emoji == Emojis.FLAG_US:
                 language = UserLanguage.ENGLISH
+                lang_suffix = 'en'
+                welcome_filename = 'Welcome.pdf'
             if language is not None:
                 user_info.next_state()
                 user_info.language = language
@@ -83,16 +87,41 @@ class DiscordBot(discord.Client):
 
                 await user.send(self._i18n.get_text(discord_username, 'language-set'))
 
-                order = self._pretix_cache.get_order(discord_username)
-                if order is None:
-                    await self._ask_roles(discord_username, user, user_info)
-                else:
-                    message = await user.send(self._i18n.get_text(discord_username, 'order-found-confirm', product=order.product, programs=order.programs))
-                    await message.add_reaction(Emojis.YES)
-                    await message.add_reaction(Emojis.NO)
+                files = [discord.File(f'files/welcome_{lang_suffix}.pdf', filename=welcome_filename), discord.File(f'files/coc_{lang_suffix}.pdf', filename='Code_of_Conduct.pdf')]
+                message = await user.send(self._i18n.get_text(discord_username, 'welcome-coc'), files=files)
+                await message.add_reaction(Emojis.YES)
+                await message.add_reaction(Emojis.NO)
+
+                user_info.state = UserState.COC_REQUESTED
+                user_info.last_message_id = message.id
+                self._database.set_user_info(discord_username, user_info)
+        elif user_info.state == UserState.COC_REQUESTED:
+            coc_accepted = None
+            if emoji == Emojis.YES:
+                coc_accepted = True
+            elif emoji == Emojis.NO:
+                coc_accepted = False
+
+            if coc_accepted is not None:
+                if coc_accepted:
                     user_info.next_state()
-                    user_info.last_message_id = message.id
                     self._database.set_user_info(discord_username, user_info)
+                    await user.send(self._i18n.get_text(discord_username, 'coc-accepted'))
+
+                    order = self._pretix_cache.get_order(discord_username)
+                    if order is None:
+                        await self._ask_roles(discord_username, user, user_info)
+                    else:
+                        message = await user.send(self._i18n.get_text(discord_username, 'order-found-confirm', product=order.product, programs=order.programs))
+                        await message.add_reaction(Emojis.YES)
+                        await message.add_reaction(Emojis.NO)
+                        user_info.next_state()
+                        user_info.last_message_id = message.id
+                        self._database.set_user_info(discord_username, user_info)
+                else:
+                    user_info.state = UserState.COC_DECLINED
+                    self._database.set_user_info(discord_username, user_info)
+                    await user.send(self._i18n.get_text(discord_username, 'coc-declined'))
         elif user_info.state == UserState.ORDER_CONFIRM:
             confirmed = None
             if emoji == Emojis.YES:

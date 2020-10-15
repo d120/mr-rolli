@@ -1,3 +1,4 @@
+from src.constants import Emojis
 from src.database import Database
 from src.model import UserLanguage, Products, Programs
 
@@ -12,6 +13,11 @@ Bitte wähle die von dir gewünschte Sprache aus:
 Please select your preferred language:'''
 }
 TEXT_GERMAN = {
+    'welcome-coc': f'''Herzlich Willkommen! Bitte lies die angehängte Willkommensnachricht und den Code of Conduct.
+
+Akzeptierst du den Code of Conduct? Klicke {Emojis.YES} für ja und {Emojis.NO} für nein (du wirst dann nicht fortfahren können).''',
+    'coc-accepted': 'Vielen Dank, dass du den CoC akzeptiert hast!',
+    'coc-declined': 'Schade, dass du den Coc ablehnst. Du wirst alle Nachrichten auf dem Server lesen können, schreiben wird dir allerdings nicht erlaubt sein.',
     'language-set': 'Deine Sprache wurde auf „Deutsch“ eingestellt!',
     'order-not-found-select-product': 'Hast du dich in einen Informatik-Bachelor [1] oder einen Informatik-Master [2] eingeschrieben oder nimmst du nur am Programmiervorkurs teil [3]?',
     'ask-bachelor-program': '''In welchen der folgenden Bachelor-Studiengänge hast du dich eingeschrieben?
@@ -44,6 +50,11 @@ Solltest du dich in mehrere Bachelor-Studiengänge eingeschrieben haben, schreib
     'msc-vc': 'Visual Computing',
 }
 TEXT_ENGLISH = {
+    'welcome-coc': f'''Welcome! Please read the attached welcome message and the code of conduct.
+
+Do you accept the code of conduct? Press {Emojis.YES} for yes and {Emojis.NO} for no (you will not be able to continue).''',
+    'coc-accepted': 'Thanks for accepting the CoC!',
+    'coc-declined': 'Sad you did decline the Coc. You will be able to read all messages but you will not be able to write any.',
     'language-set': 'Your language for set to “English”!',
     'order-not-found-select-product': 'Have you enrolled for a Computer Science Bachelor [1], Computer Science Master [2], or do you only take the programming course [3]?',
     'ask-bachelor-program': '''To which of the following bachelor programs are you enrolled?
