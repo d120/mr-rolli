@@ -48,6 +48,7 @@ Solltest du dich in mehrere Bachelor-Studiengänge eingeschrieben haben, schreib
     'msc-dke': 'Internet- und Web-basierte Systeme',
     'msc-itsec': 'IT-Sicherheit',
     'msc-vc': 'Visual Computing',
+    'roles-assigned': 'Dir wurden die entsprechenden Rollen zugewiesen. Viel Spaß!'
 }
 TEXT_ENGLISH = {
     'welcome-coc': f'''Welcome! Please read the attached welcome message and the code of conduct.
@@ -85,6 +86,7 @@ If you are enrolled for multiple bachelor programs, please write a message in #r
     'msc-dke': 'Internet- and Web-based Systems',
     'msc-itsec': 'IT-Security',
     'msc-vc': 'Visual Computing',
+    'roles-assigned': 'You have been assigned the appropriate roles. Have fun!'
 }
 
 

@@ -264,9 +264,6 @@ class DiscordBot(discord.Client):
 
     async def _assign_roles(self, discord_username: str, user: Union[discord.User, discord.Member], user_info: UserInfo, product: Optional[Products], programs: Optional[List[Programs]],
                             programming_course: bool, finished=True):
-        if product is None and programs is None and not programming_course:
-            return
-
         roles = []
         if product == Products.MASTER:
             roles.append(MASTER_ERSTI_ROLE_ID)
@@ -283,6 +280,7 @@ class DiscordBot(discord.Client):
         if finished:
             user_info.state = UserState.FINISHED
             self._database.set_user_info(discord_username, user_info)
+            await user.send(self._i18n.get_text(discord_username, 'roles-assigned'))
 
     async def _remove_master_roles(self, user: Union[discord.User, discord.Member], programs: List[Programs]):
         roles = []
