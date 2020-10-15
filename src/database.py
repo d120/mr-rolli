@@ -1,5 +1,5 @@
 import sqlite3
-from typing import List, Optional
+from typing import Optional
 
 from src.model import Products, Programs, Order, UserInfo, UserLanguage, UserState
 

@@ -8,31 +8,31 @@ from src.i18n import I18n
 from src.model import Products, Programs, UserLanguage, UserState, UserInfo
 from src.pretix_cache import PretixCache
 
-MASTER_ERSTI_ROLE_ID = '740853171454214165'
-PROGRAMMING_COURSE_ROLE_ID = '765889619375554570'
+MASTER_ERSTI_ROLE_ID = 740853171454214165
+PROGRAMMING_COURSE_ROLE_ID = 765889619375554570
 
 PROGRAMS_MAP = {}
-PROGRAMS_MAP[Programs.BACHELOR_OF_SCIENCE] = '712271886750318662'
-PROGRAMS_MAP[Programs.BACHELOR_OF_EDUCATION] = '755822924132384798'
-PROGRAMS_MAP[Programs.JOINT_BACHELOR_OF_ARTS] = '755822766091141192'
-PROGRAMS_MAP[Programs.TEACHING_AT_SECONDARY_SCHOOLS] = '755823440358801429'
-PROGRAMS_MAP[Programs.AUTONOMOUS_SYSTEMS] = '740852178247483463'
-PROGRAMS_MAP[Programs.DISTRIBUTED_SOFTWARE_SYSTEMS] = '740852484880465950'
-PROGRAMS_MAP[Programs.UNIVERSAL] = '712270706196611072'
-PROGRAMS_MAP[Programs.INTERNET_AND_WEBBASED_SYSTEMS] = '740853615643590726'
-PROGRAMS_MAP[Programs.IT_SECURITY] = '740853440925925426'
-PROGRAMS_MAP[Programs.VISUAL_COMPUTING] = '740853857919303711'
+PROGRAMS_MAP[Programs.BACHELOR_OF_SCIENCE] = 712271886750318662
+PROGRAMS_MAP[Programs.BACHELOR_OF_EDUCATION] = 755822924132384798
+PROGRAMS_MAP[Programs.JOINT_BACHELOR_OF_ARTS] = 755822766091141192
+PROGRAMS_MAP[Programs.TEACHING_AT_SECONDARY_SCHOOLS] = 755823440358801429
+PROGRAMS_MAP[Programs.AUTONOMOUS_SYSTEMS] = 740852178247483463
+PROGRAMS_MAP[Programs.DISTRIBUTED_SOFTWARE_SYSTEMS] = 740852484880465950
+PROGRAMS_MAP[Programs.UNIVERSAL] = 712270706196611072
+PROGRAMS_MAP[Programs.INTERNET_AND_WEBBASED_SYSTEMS] = 740853615643590726
+PROGRAMS_MAP[Programs.IT_SECURITY] = 740853440925925426
+PROGRAMS_MAP[Programs.VISUAL_COMPUTING] = 740853857919303711
 
 
 class DiscordRole:
-    def __init__(self, id: str):
+    def __init__(self, id: int):
         self.id = id
 
     def __repr__(self):
-        return self.id
+        return str(self.id)
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
 
 class DiscordBot(discord.Client):
@@ -46,6 +46,8 @@ class DiscordBot(discord.Client):
     async def on_ready(self):
         print(f'Discord bot ready as {self.user}.')
 
+        await self.guilds[0].fetch_roles()
+
     async def on_member_join(self, member: discord.Member):
         discord_username = self._get_discord_username(member)
         user_info = self._database.get_user_info(discord_username)
@@ -58,15 +60,17 @@ class DiscordBot(discord.Client):
             user_info.last_message_id = message.id
             self._database.set_user_info(discord_username, user_info)
 
-    async def on_reaction_add(self, reaction: discord.Reaction, user: Union[discord.Member, discord.User]):
+    async def on_raw_reaction_add(self, payload):
+        user = await self.fetch_user(payload.user_id)
+        emoji = payload.emoji.name
+        message_id = payload.message_id
         discord_username = self._get_discord_username(user)
         if user.id == self.user.id:
             return
         user_info = self._database.get_user_info(discord_username)
-        if reaction.message.id != user_info.last_message_id:
+        if message_id != user_info.last_message_id:
             return
         if user_info.state == UserState.LANGUAGE_REQUESTED:
-            emoji = reaction.emoji
             language = None
             if emoji == Emojis.FLAG_DE:
                 language = UserLanguage.GERMAN
@@ -90,7 +94,6 @@ class DiscordBot(discord.Client):
                     user_info.last_message_id = message.id
                     self._database.set_user_info(discord_username, user_info)
         elif user_info.state == UserState.ORDER_CONFIRM:
-            emoji = reaction.emoji
             confirmed = None
             if emoji == Emojis.YES:
                 confirmed = True
@@ -103,31 +106,34 @@ class DiscordBot(discord.Client):
 
                     order = self._pretix_cache.get_order(discord_username)
                     if order.product == Products.MASTER:
-                        await self._assign_roles(discord_username, user_info, order.product, order.programs, False)
+                        await self._assign_roles(discord_username, user, user_info, order.product, order.programs, False)
                     elif order.programming_course is not None:
-                        await self._assign_roles(discord_username, user_info, order.product, order.programs, order.programming_course)
+                        await self._assign_roles(discord_username, user, user_info, order.product, order.programs, order.programming_course)
                     else:
                         await self._ask_programming_course(discord_username, user, user_info)
                 else:
                     await self._ask_roles(discord_username, user, user_info)
         elif user_info.state == UserState.MANUAL_PRODUCT_ASKED:
-            await self._handle_role_reaction(discord_username, user, user_info, reaction)
+            await self._handle_role_reaction(discord_username, user, user_info, emoji)
         elif user_info.state == UserState.MANUAL_BACHELOR_PROGRAM_ASKED:
-            await self._handle_bachelor_program_reaction(discord_username, user, user_info, reaction)
+            await self._handle_bachelor_program_reaction(discord_username, user, user_info, emoji)
         elif user_info.state == UserState.MANUAL_MASTER_PROGRAM_ASKED:
-            await self._handle_master_program_reaction(discord_username, user_info, reaction)
+            await self._handle_master_program_reaction(discord_username, user, user_info, emoji)
         elif user_info.state == UserState.PROGRAMMING_COURSE_ASKED:
-            await self._handle_programming_course_reaction(discord_username, user_info, reaction)
+            await self._handle_programming_course_reaction(discord_username, user, user_info, emoji)
 
-    async def on_reaction_remove(self, reaction: discord.Reaction, user: Union[discord.Member, discord.User]):
+    async def on_raw_reaction_remove(self, payload):
+        user = await self.fetch_user(payload.user_id)
+        emoji = payload.emoji.name
+        message_id = payload.message_id
         discord_username = self._get_discord_username(user)
         if user.id == self.user.id:
             return
         user_info = self._database.get_user_info(discord_username)
-        if reaction.message.id != user_info.last_message_id:
+        if message_id != user_info.last_message_id:
             return
         if user_info.state == UserState.MANUAL_MASTER_PROGRAM_ASKED:
-            await self._handle_master_program_reaction(discord_username, user_info, reaction, remove=True)
+            await self._handle_master_program_reaction(discord_username, user, user_info, emoji, remove=True)
 
     async def on_message(self, message: discord.Message):
         if message.content == 'yikes':
@@ -143,14 +149,13 @@ class DiscordBot(discord.Client):
         user_info.last_message_id = message.id
         self._database.set_user_info(discord_username, user_info)
 
-    async def _handle_role_reaction(self, discord_username: str, user: Union[discord.Member, discord.User], user_info: UserInfo, reaction: discord.Reaction):
-        emoji = reaction.emoji
+    async def _handle_role_reaction(self, discord_username: str, user: Union[discord.Member, discord.User], user_info: UserInfo, emoji: str):
         if emoji == Emojis.ONE:  # Bachelor
             await self._ask_bachelor_program(discord_username, user, user_info)
         elif emoji == Emojis.TWO:  # Master
             await self._ask_master_program(discord_username, user, user_info)
         elif emoji == Emojis.THREE:  # Programming Course
-            await self._assign_roles(discord_username, user_info, None, None, True)
+            await self._assign_roles(discord_username, user, user_info, None, None, True)
 
     async def _ask_bachelor_program(self, discord_username: str, user: Union[discord.Member, discord.User], user_info: UserInfo):
         message = await user.send(self._i18n.get_text(discord_username, 'ask-bachelor-program'))
@@ -163,8 +168,7 @@ class DiscordBot(discord.Client):
         user_info.last_message_id = message.id
         self._database.set_user_info(discord_username, user_info)
 
-    async def _handle_bachelor_program_reaction(self, discord_username: str, user: Union[discord.Member, discord.User], user_info: UserInfo, reaction: discord.Reaction):
-        emoji = reaction.emoji
+    async def _handle_bachelor_program_reaction(self, discord_username: str, user: Union[discord.Member, discord.User], user_info: UserInfo, emoji: str):
         program = None
         if emoji == Emojis.ONE:
             program = Programs.BACHELOR_OF_SCIENCE
@@ -175,7 +179,7 @@ class DiscordBot(discord.Client):
         elif emoji == Emojis.FOUR:
             program = Programs.TEACHING_AT_SECONDARY_SCHOOLS
         if program is not None:
-            await self._assign_roles(discord_username, user_info, Products.BACHELOR, [program], False, finished=False)
+            await self._assign_roles(discord_username, user, user_info, Products.BACHELOR, [program], False, finished=False)
             await self._ask_programming_course(discord_username, user, user_info)
 
     async def _ask_master_program(self, discord_username: str, user: Union[discord.Member, discord.User], user_info: UserInfo):
@@ -191,8 +195,7 @@ class DiscordBot(discord.Client):
         user_info.last_message_id = message.id
         self._database.set_user_info(discord_username, user_info)
 
-    async def _handle_master_program_reaction(self, discord_username: str, user_info: UserInfo, reaction: discord.Reaction, remove=False):
-        emoji = reaction.emoji
+    async def _handle_master_program_reaction(self, discord_username: str, user: Union[discord.User, discord.Member], user_info: UserInfo, emoji: str, remove=False):
         program = None
         if emoji == Emojis.ONE:
             program = Programs.AUTONOMOUS_SYSTEMS
@@ -208,9 +211,9 @@ class DiscordBot(discord.Client):
             program = Programs.VISUAL_COMPUTING
         if program is not None:
             if remove:
-                await self._remove_master_roles(discord_username, [program])
+                await self._remove_master_roles(user, [program])
             else:
-                await self._assign_roles(discord_username, user_info, Products.MASTER, [program], False, finished=False)
+                await self._assign_roles(discord_username, user, user_info, Products.MASTER, [program], False, finished=False)
 
     async def _ask_programming_course(self, discord_username: str, user: Union[discord.Member, discord.User], user_info: UserInfo):
         message = await user.send(self._i18n.get_text(discord_username, 'ask-programming-course'))
@@ -221,40 +224,46 @@ class DiscordBot(discord.Client):
         user_info.last_message_id = message.id
         self._database.set_user_info(discord_username, user_info)
 
-    async def _handle_programming_course_reaction(self, discord_username: str, user_info: UserInfo, reaction: discord.Reaction):
-        emoji = reaction.emoji
+    async def _handle_programming_course_reaction(self, discord_username: str, user: Union[discord.User, discord.Member], user_info: UserInfo, emoji: str):
         programming_course = None
         if emoji == Emojis.YES:
             programming_course = True
         elif emoji == Emojis.NO:
             programming_course = False
         if programming_course is not None:
-            await self._assign_roles(discord_username, user_info, None, None, programming_course)
+            await self._assign_roles(discord_username, user, user_info, None, None, programming_course)
 
-    async def _assign_roles(self, discord_username: str, user_info: UserInfo, product: Optional[Products], programs: Optional[List[Programs]], programming_course: bool, finished=True):
+    async def _assign_roles(self, discord_username: str, user: Union[discord.User, discord.Member], user_info: UserInfo, product: Optional[Products], programs: Optional[List[Programs]],
+                            programming_course: bool, finished=True):
         if product is None and programs is None and not programming_course:
             return
 
         roles = []
         if product == Products.MASTER:
-            roles.append(DiscordRole(MASTER_ERSTI_ROLE_ID))
+            roles.append(MASTER_ERSTI_ROLE_ID)
         if programs is not None:
             for program in programs:
-                roles.append(DiscordRole(PROGRAMS_MAP[program]))
+                roles.append(PROGRAMS_MAP[program])
         if programming_course:
-            roles.append(DiscordRole(PROGRAMMING_COURSE_ROLE_ID))
-        print('Assigning roles %s to user %s.' % (roles, discord_username))
+            roles.append(PROGRAMMING_COURSE_ROLE_ID)
+
+        guild = self.guilds[0]
+        member = await guild.fetch_member(user.id)
+        await member.add_roles(*[DiscordRole(role_id) for role_id in roles], atomic=True)
 
         if finished:
             user_info.state = UserState.FINISHED
             self._database.set_user_info(discord_username, user_info)
 
-    async def _remove_master_roles(self, discord_username: str, programs: List[Programs]):
+    async def _remove_master_roles(self, user: Union[discord.User, discord.Member], programs: List[Programs]):
         roles = []
         if programs is not None:
             for program in programs:
-                roles.append(DiscordRole(PROGRAMS_MAP[program]))
-        print('Removing roles %s from user %s.' % (roles, discord_username))
+                roles.append(PROGRAMS_MAP[program])
+
+        guild = self.guilds[0]
+        member = await guild.fetch_member(user.id)
+        await member.remove_roles(*[DiscordRole(role_id) for role_id in roles], atomic=True)
 
     def _get_discord_username(self, user: Union[discord.Member, discord.User]):
         return user.name + '#' + user.discriminator
