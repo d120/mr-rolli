@@ -60,6 +60,8 @@ class DiscordBot(discord.Client):
             user_info.last_message_id = message.id
             self._database.set_user_info(discord_username, user_info)
 
+            self._log(discord_username, user_info, 'Joined.')
+
     async def on_raw_reaction_add(self, payload):
         user = await self.fetch_user(payload.user_id)
         emoji = payload.emoji.name
@@ -122,6 +124,9 @@ class DiscordBot(discord.Client):
                     user_info.state = UserState.COC_DECLINED
                     self._database.set_user_info(discord_username, user_info)
                     await user.send(self._i18n.get_text(discord_username, 'coc-declined'))
+
+                    self._log(discord_username, user_info, 'DECLINED CODE OF CONDUCT! Enabling message log.')
+                    self._database.mark_coc_decliner(user.id)
         elif user_info.state == UserState.ORDER_CONFIRM:
             confirmed = None
             if emoji == Emojis.YES:
@@ -165,6 +170,9 @@ class DiscordBot(discord.Client):
             await self._handle_master_program_reaction(discord_username, user, user_info, emoji, remove=True)
 
     async def on_message(self, message: discord.Message):
+        if self._database.is_coc_decliner(message.author.id):
+            print(f'Message from CoC decliner ({message.author}): <{message.content}> ({message.id})')
+
         if message.content == 'yikes':
             await self.on_member_join(message.author)
 
@@ -277,10 +285,14 @@ class DiscordBot(discord.Client):
         member = await guild.fetch_member(user.id)
         await member.add_roles(*[DiscordRole(role_id) for role_id in roles], atomic=True)
 
+        self._log(discord_username, user_info, 'Assigned roles according to product %s, programs %s and pc %s.' % (str(product), str(programs), str(programming_course)))
+
         if finished:
             user_info.state = UserState.FINISHED
             self._database.set_user_info(discord_username, user_info)
             await user.send(self._i18n.get_text(discord_username, 'roles-assigned'))
+
+            self._log(discord_username, user_info, 'Finished.')
 
     async def _remove_master_roles(self, user: Union[discord.User, discord.Member], programs: List[Programs]):
         roles = []
@@ -294,3 +306,6 @@ class DiscordBot(discord.Client):
 
     def _get_discord_username(self, user: Union[discord.Member, discord.User]):
         return user.name + '#' + user.discriminator
+
+    def _log(self, discord_username: str, user_info: UserInfo, msg: str):
+        print('%s, %s: %s' % (discord_username, str(user_info), msg))

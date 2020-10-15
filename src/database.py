@@ -35,6 +35,8 @@ class Database:
                                   PRIMARY KEY (discord_username)
                               )''')
 
+        self._conn.execute('CREATE TABLE IF NOT EXISTS coc_decliners (discord_id INT PRIMARY KEY NOT NULL)')
+
         self._conn.commit()
 
     def insert_order(self, order: Order, overwrite: bool = False) -> bool:
@@ -83,3 +85,10 @@ class Database:
             language = None if row[1] is None else UserLanguage(row[1])
             last_message_id = row[2]
         return UserInfo(state, language, last_message_id)
+
+    def is_coc_decliner(self, discord_id: int) -> bool:
+        return next(self._conn.execute('SELECT COUNT(*) FROM coc_decliners WHERE discord_id = ?', [discord_id]))[0] > 0
+
+    def mark_coc_decliner(self, discord_id: int):
+        self._conn.execute('INSERT INTO coc_decliners (discord_id) VALUES (?) ON CONFLICT DO NOTHING', [discord_id])
+        self._conn.commit()

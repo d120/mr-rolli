@@ -61,6 +61,12 @@ class UserInfo:
         self.state = self.state.next()
         return self
 
+    def __str__(self):
+        return repr(self)
+
+    def __repr__(self):
+        return 'state=%s' % str(self.state)
+
 
 class Order:
     discord_username: str
