@@ -1,9 +1,24 @@
+import functools
 import sqlite3
+import threading
 from typing import Optional
 
 from src.model import Products, Programs, Order, UserInfo, UserLanguage, UserState
 
 
+def synchronized(wrapped):
+    lock = threading.Lock()
+
+    @functools.wraps(wrapped)
+    def _wrap(*args, **kwargs):
+        print('Calling "%s" with Lock %s.' % (wrapped.__name__, id(lock)))
+        with lock:
+            return wrapped(*args, **kwargs)
+
+    return _wrap
+
+
+@synchronized
 class Database:
     def __init__(self):
         self._conn = sqlite3.connect('database.sqlite')
