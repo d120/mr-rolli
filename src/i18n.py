@@ -55,8 +55,8 @@ TEXT_ENGLISH = {
 
 Do you accept the code of conduct? Press {Emojis.YES} for yes and {Emojis.NO} for no (you will not be able to continue).''',
     'coc-accepted': 'Thanks for accepting the CoC!',
-    'coc-declined': 'Sad you did decline the Coc. You will be able to read all messages but you will not be able to write any.',
-    'language-set': 'Your language for set to “English”!',
+    'coc-declined': 'Sadly you did decline the Coc. You will be able to read all messages but you will not be able to write any.',
+    'language-set': 'Your language was set to “English”!',
     'order-not-found-select-product': 'Have you enrolled for a Computer Science Bachelor [1], Computer Science Master [2], or do you only take the programming course [3]?',
     'ask-bachelor-program': '''To which of the following bachelor programs are you enrolled?
 1. Bachelor of Science (B.Sc.)
