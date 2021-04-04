@@ -19,14 +19,6 @@ Akzeptierst du den Code of Conduct? Klicke {Emojis.YES} für ja und {Emojis.NO} 
     'coc-accepted': 'Vielen Dank, dass du den CoC akzeptiert hast!',
     'coc-declined': 'Schade, dass du den Coc ablehnst. Du wirst alle Nachrichten auf dem Server lesen können, schreiben wird dir allerdings nicht erlaubt sein.',
     'language-set': 'Deine Sprache wurde auf „Deutsch“ eingestellt!',
-    'order-not-found-select-product': 'Hast du dich in einen Informatik-Bachelor [1] oder einen Informatik-Master [2] eingeschrieben oder nimmst du nur am Programmiervorkurs teil [3]?',
-    'ask-bachelor-program': '''In welchen der folgenden Bachelor-Studiengänge hast du dich eingeschrieben?
-1. Bachelor of Science (B.Sc.)
-2. Bachelor of Education (B.Ed.)
-3. Joint Bachelor of Arts (JBA)
-4. Lehramt an Gymnasien (LAG)
-Solltest du dich in mehrere Bachelor-Studiengänge eingeschrieben haben, schreibe bitte eine Nachricht in #role-assignment.
-''',
     'ask-master-program': '''In welche der folgenden Master-Studiengänge hast du dich eingeschrieben?
 1. Autonome Systeme
 2. Distributed Software Systems
@@ -35,12 +27,7 @@ Solltest du dich in mehrere Bachelor-Studiengänge eingeschrieben haben, schreib
 5. IT-Sicherheit
 6. Visual Computing
 ''',
-    'ask-programming-course': 'Nimmst du am Programmiervorkurs teil?',
     'order-found-confirm-head': 'Wir konnten eine Anmeldung von dir finden 🙂',
-    'order-found-confirm-bsc': 'Hast du dich in den Bachelor of Science (B.Sc.) eingeschrieben?',
-    'order-found-confirm-bed': 'Hast du dich in den Bachelor of Education (B.Ed.) eingeschrieben?',
-    'order-found-confirm-jba': 'Hast du dich in den Joint Bachelor of Arts (JBA) eingeschrieben?',
-    'order-found-confirm-lag': 'Hast du dich in Lehramt an Gymnasien (LAG) eingeschrieben?',
     'order-found-confirm-msc': 'Hast du dich in die folgenden Master-Studiengänge eingeschrieben?',
     'msc-as': 'Autonome Systeme',
     'msc-dss': 'Distributed Software Systems',
@@ -57,14 +44,6 @@ Do you accept the code of conduct? Press {Emojis.YES} for yes and {Emojis.NO} fo
     'coc-accepted': 'Thanks for accepting the CoC!',
     'coc-declined': 'Sadly you did decline the Coc. You will be able to read all messages but you will not be able to write any.',
     'language-set': 'Your language was set to “English”!',
-    'order-not-found-select-product': 'Have you enrolled for a Computer Science Bachelor [1], Computer Science Master [2], or do you only take the programming course [3]?',
-    'ask-bachelor-program': '''To which of the following bachelor programs are you enrolled?
-1. Bachelor of Science (B.Sc.)
-2. Bachelor of Education (B.Ed.)
-3. Joint Bachelor of Arts (JBA)
-4. Teaching at Secondary Schools (LAG)
-If you are enrolled for multiple bachelor programs, please write a message in #role-assignment.
-''',
     'ask-master-program': '''To which of the following master programs are you enrolled?
 1. Autonomous Systems
 2. Distributed Software Systems
@@ -75,14 +54,10 @@ If you are enrolled for multiple bachelor programs, please write a message in #r
 ''',
     'ask-programming-course': 'Do you attend the programming course?',
     'order-found-confirm-head': 'We found a registration from you 🙂',
-    'order-found-confirm-bsc': 'Are you enrolled for the Bachelor of Science?',
-    'order-found-confirm-bed': 'Are you enrolled for the Bachelor of Education?',
-    'order-found-confirm-jba': 'Are you enrolled for the Joint Bachelor of Arts?',
-    'order-found-confirm-lag': 'Are you enrolled for Teaching at Secondary Schools (LAG)?',
     'order-found-confirm-msc': 'Are you enrolled for the following master programs?',
     'msc-as': 'Autonomous Systems',
     'msc-dss': 'Distributed Software Systems',
-    'msc-cs': 'Computer Science (Universal)',
+    'msc-cs': 'Computer Science (General)',
     'msc-dke': 'Internet- and Web-based Systems',
     'msc-itsec': 'IT-Security',
     'msc-vc': 'Visual Computing',
@@ -137,7 +112,7 @@ class I18n:
                         text += self._get_text(language, 'msc-as')
                     elif program == Programs.DISTRIBUTED_SOFTWARE_SYSTEMS:
                         text += self._get_text(language, 'msc-dss')
-                    elif program == Programs.UNIVERSAL:
+                    elif program == Programs.GENERAL:
                         text += self._get_text(language, 'msc-cs')
                     elif program == Programs.INTERNET_AND_WEBBASED_SYSTEMS:
                         text += self._get_text(language, 'msc-dke')

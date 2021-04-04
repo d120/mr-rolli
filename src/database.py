@@ -31,7 +31,6 @@ class Database:
         self._conn.execute('''CREATE TABLE IF NOT EXISTS orders (
                                   discord_username VARCHAR(256) NOT NULL,
                                   product_id INT NOT NULL,
-                                  programming_course BOOLEAN NULL,
                                   PRIMARY KEY (discord_username)
                               )''')
 
@@ -60,8 +59,8 @@ class Database:
                 self._conn.execute('DELETE FROM orders WHERE discord_username = ?', [order.discord_username])
             else:
                 return False
-        self._conn.execute('INSERT INTO orders (discord_username, product_id, programming_course) VALUES (?, ?, ?)',
-                           [order.discord_username, order.product.value, order.programming_course])
+        self._conn.execute('INSERT INTO orders (discord_username, product_id) VALUES (?, ?)',
+                           [order.discord_username, order.product.value])
         for program_id in order.programs:
             self._conn.execute('INSERT INTO orders_programs (discord_username, program_id) VALUES (?, ?) ON CONFLICT (discord_username, program_id) DO NOTHING',
                                [order.discord_username, program_id.value])
@@ -71,20 +70,19 @@ class Database:
     def get_order(self, discord_username: str) -> Optional[Order]:
         query = '''SELECT
                        product_id,
-                       programming_course,
                        op.program_id
                    FROM orders
                    INNER JOIN orders_programs op ON orders.discord_username = op.discord_username
                    WHERE
                        orders.discord_username = ?'''
         cursor = self._conn.execute(query, [discord_username])
-        product_id, programming_course, programs = None, None, []
+        product_id, programs = None, []
         for row in cursor:
-            product_id, programming_course, program_id = row
+            product_id, program_id = row
             programs.append(Programs(program_id))
         if product_id is None:
             return None
-        return Order(discord_username, Products(product_id), programs, programming_course)
+        return Order(discord_username, Products(product_id), programs)
 
     def set_user_info(self, discord_username: str, user_info: UserInfo) -> None:
         data = (user_info.state.value, None if user_info.language is None else user_info.language.value, user_info.last_message_id)

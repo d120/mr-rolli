@@ -1,5 +1,5 @@
 PRETIX_ORGANIZER = 'ophase'
-PRETIX_EVENT = 'ws-2020-21'
+PRETIX_EVENT = '2021'
 
 
 class Emojis:
