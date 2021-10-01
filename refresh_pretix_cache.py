@@ -4,8 +4,7 @@ from src.pretix_cache import PretixCache
 from src.tokens import PRETIX_AUTH_TOKEN
 
 
-if __name__ == '__main__':
-    cache = PretixCache(PretixApi('https://anmeldung.d120.de', PRETIX_AUTH_TOKEN), PRETIX_ORGANIZER, PRETIX_EVENT)
-    print('Refreshing pretix cache database...')
-    cache.refresh()
-    print('Finished!')
+cache = PretixCache(PretixApi('https://anmeldung.d120.de', PRETIX_AUTH_TOKEN), PRETIX_ORGANIZER, PRETIX_EVENT)
+print('Refreshing pretix cache database...')
+cache.refresh()
+print('Finished!')
