@@ -8,20 +8,21 @@ from src.i18n import I18n
 from src.model import Products, Programs, UserLanguage, UserState, UserInfo
 from src.pretix_cache import PretixCache
 
-MASTER_ERSTI_ROLE_ID = 740853171454214165
-PROGRAMMING_COURSE_ROLE_ID = 765889619375554570
+
+MASTER_ERSTI_ROLE_ID = 854393229474398218
+PROGRAMMING_COURSE_ROLE_ID = 854393229091668034
 
 PROGRAMS_MAP = {}
-PROGRAMS_MAP[Programs.BACHELOR_OF_SCIENCE] = 712271886750318662
-PROGRAMS_MAP[Programs.BACHELOR_OF_EDUCATION] = 755822924132384798
-PROGRAMS_MAP[Programs.JOINT_BACHELOR_OF_ARTS] = 755822766091141192
-PROGRAMS_MAP[Programs.TEACHING_AT_SECONDARY_SCHOOLS] = 755823440358801429
-PROGRAMS_MAP[Programs.AUTONOMOUS_SYSTEMS] = 740852178247483463
-PROGRAMS_MAP[Programs.DISTRIBUTED_SOFTWARE_SYSTEMS] = 740852484880465950
-PROGRAMS_MAP[Programs.UNIVERSAL] = 712270706196611072
-PROGRAMS_MAP[Programs.INTERNET_AND_WEBBASED_SYSTEMS] = 740853615643590726
-PROGRAMS_MAP[Programs.IT_SECURITY] = 740853440925925426
-PROGRAMS_MAP[Programs.VISUAL_COMPUTING] = 740853857919303711
+PROGRAMS_MAP[Programs.BACHELOR_OF_SCIENCE] = 854393229091668035
+PROGRAMS_MAP[Programs.BACHELOR_OF_EDUCATION] = 854393229091668037
+PROGRAMS_MAP[Programs.JOINT_BACHELOR_OF_ARTS] = 854393229091668038
+PROGRAMS_MAP[Programs.TEACHING_AT_SECONDARY_SCHOOLS] = 854393229091668036
+PROGRAMS_MAP[Programs.AUTONOMOUS_SYSTEMS] = 854393229474398223
+PROGRAMS_MAP[Programs.DISTRIBUTED_SOFTWARE_SYSTEMS] = 854393229474398222
+PROGRAMS_MAP[Programs.UNIVERSAL] = 854393229474398224
+PROGRAMS_MAP[Programs.INTERNET_AND_WEBBASED_SYSTEMS] = 854393229474398220
+PROGRAMS_MAP[Programs.IT_SECURITY] = 854393229474398221
+PROGRAMS_MAP[Programs.VISUAL_COMPUTING] = 854393229474398219
 
 
 class DiscordRole:
@@ -270,7 +271,8 @@ class DiscordBot(discord.Client):
         if programming_course is not None:
             await self._assign_roles(discord_username, user, user_info, None, None, programming_course)
 
-    async def _assign_roles(self, discord_username: str, user: Union[discord.User, discord.Member], user_info: UserInfo, product: Optional[Products], programs: Optional[List[Programs]],
+    async def _assign_roles(self, discord_username: str, user: Union[discord.User, discord.Member], user_info: UserInfo, product: Optional[Products],
+                            programs: Optional[List[Programs]],
                             programming_course: bool, finished=True):
         roles = []
         if product == Products.MASTER:

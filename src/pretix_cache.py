@@ -10,8 +10,9 @@ BACHELOR_QUESTION_IDENTIFIER = 'bachelor-programs'
 MASTER_QUESTION_IDENTIFIER = 'master-programs'
 PROGRAMMING_COURSE_QUESTION_IDENTIFIER = 'programming-course'
 PRODUCTS_MAP = {
-    34: Products.MASTER,
-    35: Products.BACHELOR
+    48: Products.MASTER,
+    47: Products.BACHELOR,
+    50: Products.BACHELOR,  # LaG, etc.
 }
 PROGRAMS_MAP = {
     # Bachelor programs.
