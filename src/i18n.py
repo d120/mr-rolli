@@ -101,7 +101,7 @@ class I18n:
         user_info = self._database.get_user_info(discord_username)
         language = user_info.language
         if language is None:
-            raise Exception(f'A non-universal text {id=} was requested, but the user {discord_username=} does not have a specified language!')
+            raise Exception(f'A non-universal text {id} was requested, but the user {discord_username} does not have a specified language!')
         return self._get_text(language, id, **kwargs)
 
     def _get_text(self, language: UserLanguage, id: str, **kwargs):
@@ -113,7 +113,7 @@ class I18n:
             return TEXT_GERMAN[id]
         if language == UserLanguage.ENGLISH and id in TEXT_ENGLISH:
             return TEXT_ENGLISH[id]
-        raise Exception(f'Cannot find translated text {id=} for language {language=}!')
+        raise Exception(f'Cannot find translated text {id} for language {language}!')
 
     def _handle_special_text(self, language: UserLanguage, id: str, **kwargs):
         if id == ORDER_FOUND_CONFIRM:
@@ -146,7 +146,7 @@ class I18n:
                     elif program == Programs.VISUAL_COMPUTING:
                         text += self._get_text(language, 'msc-vc')
             else:
-                raise Exception(f'Unknown {product=}!')
+                raise Exception(f'Unknown {product}!')
         else:
-            raise Exception(f'Unknown special text {id=}!')
+            raise Exception(f'Unknown special text {id}!')
         return text
