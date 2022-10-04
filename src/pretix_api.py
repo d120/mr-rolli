@@ -45,15 +45,11 @@ class PretixApi(LoggerAware):
             start = time.perf_counter()
             sublist, next_page, _, total_pages = self._fetch_paginated(path, page)
             end = time.perf_counter()
-            self.logger.info(
-                f"Finished request {page:d}/{total_pages:d}. Took {end - start:.1f}s."
-            )
+            self.logger.info(f"Finished request {page:d}/{total_pages:d}. Took {end - start:.1f}s.")
             yield from sublist
             page = next_page
 
-    def _fetch_paginated(
-        self, path: str, page: int
-    ) -> tuple[list[ApiResponse], Optional[int], Optional[int], int]:
+    def _fetch_paginated(self, path: str, page: int) -> tuple[list[ApiResponse], Optional[int], Optional[int], int]:
         result = self._fetch_GET(f"{path}?page={page}")
         has_next_page = bool(result["next"])
         has_previous_page = bool(result["previous"])
@@ -64,10 +60,6 @@ class PretixApi(LoggerAware):
 
     def _fetch_GET(self, path: str = "") -> ApiResponse:
         url = f"{self._api_url}/organizers/{self._organizer}/events/{self._event_name}{path}"
-        response = requests.get(
-            url, headers={"Authorization": f"Token {self._auth_token}"}
-        )
-        assert (
-            200 <= response.status_code < 400
-        ), f"Unexpected response code {response.status_code} while GETting '{url}'."
+        response = requests.get(url, headers={"Authorization": f"Token {self._auth_token}"})
+        assert 200 <= response.status_code < 400, f"Unexpected response code {response.status_code} while GETting '{url}'."
         return response.json()

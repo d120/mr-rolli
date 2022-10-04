@@ -10,12 +10,7 @@ from timed_lru_cache import timed_lru_cache
 class Pretix(LoggerAware):
     def __init__(self):
         super().__init__()
-        self._api = PretixApi(
-            config.pretix_url,
-            config.pretix_organizer,
-            config.pretix_event,
-            config.pretix_auth_token,
-        )
+        self._api = PretixApi(config.pretix_url, config.pretix_organizer, config.pretix_event, config.pretix_auth_token)
 
     @timed_lru_cache()
     def load_order(self, discord_username: str) -> Optional[Order]:
@@ -46,15 +41,11 @@ class Pretix(LoggerAware):
             return None
         programs = {}
         programming_course = False
-        available_programs: dict[str, ProgramOption] = {
-            program.identifier: program for program in product.programs
-        }
+        available_programs: dict[str, ProgramOption] = {program.identifier: program for program in product.programs}
         for answer in raw_order["answers"]:
             question_identifier = answer["question_identifier"]
             if question_identifier == config.pretix_discord_username:
-                discord_username = "#".join(
-                    [x.strip() for x in answer["answer"].split("#")]
-                )
+                discord_username = "#".join([x.strip() for x in answer["answer"].split("#")])
                 if "#" not in discord_username:
                     discord_username = None
             elif question_identifier in available_programs.keys():
@@ -62,9 +53,7 @@ class Pretix(LoggerAware):
                     option = available_programs[question_identifier]
                     if option.identifier not in programs:
                         programs[option.identifier] = Program(option, [])
-                    programs[option.identifier].selected_options.append(
-                        option.options[opt]
-                    )
+                    programs[option.identifier].selected_options.append(option.options[opt])
             elif question_identifier == config.pretix_programming_course:
                 programming_course = answer["answer"] == "True"
         programs = list(programs.values())
@@ -81,12 +70,8 @@ class Pretix(LoggerAware):
             if not raw_product["active"]:
                 continue
             product_id = raw_product["id"]
-            matching_programs = filter(
-                lambda program: product_id in program.product_ids, programs
-            )
-            products[product_id] = Product(
-                product_id, raw_product["name"], list(matching_programs)
-            )
+            matching_programs = filter(lambda program: product_id in program.product_ids, programs)
+            products[product_id] = Product(product_id, raw_product["name"], list(matching_programs))
         return products
 
     @timed_lru_cache()
@@ -96,14 +81,5 @@ class Pretix(LoggerAware):
         for raw_question in self._api.fetch_questions():
             if not raw_question["identifier"].endswith(config.pretix_programs_suffix):
                 continue
-            programs.append(
-                ProgramOption(
-                    raw_question["identifier"],
-                    raw_question["items"],
-                    {
-                        option["identifier"]: option["answer"]
-                        for option in raw_question["options"]
-                    },
-                )
-            )
+            programs.append(ProgramOption(raw_question["identifier"], raw_question["items"], {option["identifier"]: option["answer"] for option in raw_question["options"]}))
         return programs

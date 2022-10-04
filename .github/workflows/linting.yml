@@ -12,7 +12,7 @@ jobs:
       - name: run black
         uses: psf/black@22.8.0
         with:
-          args: "--check src"
+          options: "--check --diff --line-length 180 src"
   isort:
     name: Check Import Order
     runs-on: ubuntu-latest
